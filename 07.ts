@@ -1,12 +1,11 @@
-import { execute, IO } from "./intcode";
+import { IntcodeProcessor, IO } from "./intcode";
 
 type PhaseSetting = [number, number, number, number, number];
 
 class AmpIO implements IO {
 
+    public input: number[] = [];
     public output: number[] = [];
-
-    constructor(public input: number[]) { }
 
     public read() {
         return this.input.shift();
@@ -18,21 +17,60 @@ class AmpIO implements IO {
 }
 
 class Amplifier {
-    constructor(private program: number[], public io: AmpIO) {}
 
-    public run(prevOutput: number) {
-        this.io.input.push(prevOutput);
-        execute(this.program, this.io);
-        return this.io.output[0];
+    public io: AmpIO;
+
+    private proc: IntcodeProcessor;
+
+    constructor(program: number[]) {
+        this.io = new AmpIO();
+        this.proc = new IntcodeProcessor(program, this.io);
+    }
+
+    get halted() {
+        return this.proc.halted;
+    }
+
+    public run() {
+        this.proc.execute();
     }
 }
 
 function runAmps(program: number[], phase: PhaseSetting) {
-    let lastOutput = 0;
+    const amps: Amplifier[] = [];
     for (let i = 0; i < 5; i++) {
-        lastOutput = new Amplifier([...program], new AmpIO([phase[i]])).run(lastOutput);
+        amps.push(new Amplifier([...program]));
     }
-    return lastOutput;
+    for (let i = 1; i < 5; i++) {
+        amps[i].io.input = amps[i - 1].io.output;
+        amps[i].io.input.push(phase[i]);
+    }
+    amps[0].io.input.push(phase[0]);
+    amps[0].io.input.push(0);
+    for (const amp of amps) {
+        amp.run();
+    }
+    return amps[amps.length - 1].io.output[0];
+}
+
+function runFeedbackAmps(program: number[], phase: PhaseSetting) {
+    const amps: Amplifier[] = [];
+    for (let i = 0; i < 5; i++) {
+        amps.push(new Amplifier([...program]));
+    }
+    let prevAmp = amps[amps.length - 1];
+    for (let i = 0; i < amps.length; i ++) {
+        amps[i].io.input = prevAmp.io.output;
+        amps[i].io.input.push(phase[i]);
+        prevAmp = amps[i];
+    }
+    amps[0].io.input.push(0);
+    while (amps.some(amp => !amp.halted)) {
+        for (const amp of amps) {
+            amp.run();
+        }
+    }
+    return amps[amps.length - 1].io.output[0];
 }
 
 function generatePhases(available: number[], phase: number[] = []): PhaseSetting[] {
@@ -49,7 +87,7 @@ function generatePhases(available: number[], phase: number[] = []): PhaseSetting
 
 export function solve(lines: string[]) {
     const program = lines[0].split(",").map(s => +s);
-    return generatePhases([0, 1, 2, 3, 4])
-        .map(phase => runAmps(program, phase))
+    return generatePhases([5, 6, 7, 8, 9])
+        .map(phase => runFeedbackAmps(program, phase))
         .reduce((max, x) => x > max ? x : max);
 }

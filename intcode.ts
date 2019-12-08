@@ -36,39 +36,51 @@ export interface IO {
     write(v: number): void;
 }
 
-export function execute(program: number[], io: IO) {
-    let position = 0;
-    const opExecutor = (opcode: Opcode, f: (a: number, b: number) => number) => opcode.executeOp(f)(program, position);
-    while (program[position] !== 99) {
-        const opcode = new Opcode(program[position]);
-        if (opcode.opcode === 1) {
-            program[program[position + 3]] = opExecutor(opcode, (a, b) => a + b);
-            position += 4;
-        } else if (opcode.opcode === 2) {
-            program[program[position + 3]] = opExecutor(opcode, (a, b) => a * b);
-            position += 4;
-        } else if (opcode.opcode === 3) {
-            const v = io.read();
-            if (v === undefined) {
-                throw new Error("Unexpected input");
+export class IntcodeProcessor {
+
+    public halted = false;
+
+    private position = 0;
+
+    constructor(private program: number[], private io: IO) { }
+
+    public execute() {
+        while (this.program[this.position] !== 99) {
+            const opcode = new Opcode(this.program[this.position]);
+            if (opcode.opcode === 1) {
+                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a + b);
+                this.position += 4;
+            } else if (opcode.opcode === 2) {
+                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a * b);
+                this.position += 4;
+            } else if (opcode.opcode === 3) {
+                const v = this.io.read();
+                if (v === undefined) {
+                    return;
+                }
+                this.program[this.program[this.position + 1]] = v;
+                this.position += 2;
+            } else if (opcode.opcode === 4) {
+                this.io.write(this.program[this.program[this.position + 1]]);
+                this.position += 2;
+            } else if (opcode.opcode === 5) {
+                this.position = this.executeOp(opcode, (a, b) => a !== 0 ? b : this.position + 3);
+            } else if (opcode.opcode === 6) {
+                this.position = this.executeOp(opcode, (a, b) => a === 0 ? b : this.position + 3);
+            } else if (opcode.opcode === 7) {
+                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a < b ? 1 : 0);
+                this.position += 4;
+            } else if (opcode.opcode === 8) {
+                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a === b ? 1 : 0);
+                this.position += 4;
+            } else {
+                throw new Error(`Wrong opcode at ${this.position}: ${this.program[this.position]}`);
             }
-            program[program[position + 1]] = v;
-            position += 2;
-        } else if (opcode.opcode === 4) {
-            io.write(program[program[position + 1]]);
-            position += 2;
-        } else if (opcode.opcode === 5) {
-            position = opExecutor(opcode, (a, b) => a !== 0 ? b : position + 3);
-        } else if (opcode.opcode === 6) {
-            position = opExecutor(opcode, (a, b) => a === 0 ? b : position + 3);
-        } else if (opcode.opcode === 7) {
-            program[program[position + 3]] = opExecutor(opcode, (a, b) => a < b ? 1 : 0);
-            position += 4;
-        } else if (opcode.opcode === 8) {
-            program[program[position + 3]] = opExecutor(opcode, (a, b) => a === b ? 1 : 0);
-            position += 4;
-        } else {
-            throw new Error(`Wrong opcode at ${position}: ${program[position]}`);
         }
+        this.halted = true;
+    }
+
+    private executeOp(opcode: Opcode, f: (a: number, b: number) => number) {
+        return opcode.executeOp(f)(this.program, this.position);
     }
 }
