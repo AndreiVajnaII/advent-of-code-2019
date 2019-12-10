@@ -1,34 +1,42 @@
-class Opcode {
-    public opcode: number;
-    public modes: [boolean, boolean, boolean];
+type ParameterMode = 0 | 1 | 2;
 
-    constructor(code: number) {
+class Instruction {
+    public opcode: number;
+    public modes: [ParameterMode, ParameterMode, ParameterMode];
+    public getParam: (index: number) => number;
+    public setParam: (index: number, value: number) => void;
+
+    private resolveParamIndex: (index: number) => number;
+
+    constructor(program: number[], position: number, relativeBase: number) {
+        const code = program[position];
         this.opcode = code % 100;
         this.modes = [
-            (code % 1000) / 100 >= 1,
-            (code % 10000) / 1000 >= 1,
-            code / 10000 >= 1,
+            Math.floor((code % 1000) / 100) as ParameterMode,
+            Math.floor((code % 10000) / 1000) as ParameterMode,
+            Math.floor(code / 10000) as ParameterMode,
         ];
-    }
-
-    public getValue(index: number) {
-        return (program: number[], position: number) => {
-            return this.modes[index]
-                ? program[position]
-                : program[program[position]];
+        this.resolveParamIndex = index => {
+            switch (this.modes[index]) {
+                case 0:
+                    return program[position + index + 1];
+                case 1:
+                    return position + index + 1;
+                case 2:
+                    return relativeBase + program[position + index + 1];
+            }
+        };
+        this.getParam = index => {
+            return program[this.resolveParamIndex(index)] || 0;
+        };
+        this.setParam = (index, value) => {
+            program[this.resolveParamIndex(index)] = value;
         };
     }
 
-    public binaryOp(f: (a: number, b: number) => number) {
-        return f;
+    public executeBinary(f: (a: number, b: number) => number) {
+        return f(this.getParam(0), this.getParam(1));
     }
-
-    public executeOp(f: (a: number, b: number) => number) {
-        return (program: number[], position: number) => f(
-            this.getValue(0)(program, position + 1),
-            this.getValue(1)(program, position + 2));
-    }
-
 }
 
 export interface IO {
@@ -41,38 +49,42 @@ export class IntcodeProcessor {
     public halted = false;
 
     private position = 0;
+    private relativeBase = 0;
 
     constructor(private program: number[], private io: IO) { }
 
-    public execute() {
+    public run() {
         while (this.program[this.position] !== 99) {
-            const opcode = new Opcode(this.program[this.position]);
-            if (opcode.opcode === 1) {
-                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a + b);
+            const instruction = new Instruction(this.program, this.position, this.relativeBase);
+            if (instruction.opcode === 1) {
+                instruction.setParam(2, instruction.executeBinary((a, b) => a + b));
                 this.position += 4;
-            } else if (opcode.opcode === 2) {
-                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a * b);
+            } else if (instruction.opcode === 2) {
+                instruction.setParam(2, instruction.executeBinary((a, b) => a * b));
                 this.position += 4;
-            } else if (opcode.opcode === 3) {
+            } else if (instruction.opcode === 3) {
                 const v = this.io.read();
                 if (v === undefined) {
                     return;
                 }
-                this.program[this.program[this.position + 1]] = v;
+                instruction.setParam(0, v);
                 this.position += 2;
-            } else if (opcode.opcode === 4) {
-                this.io.write(this.program[this.program[this.position + 1]]);
+            } else if (instruction.opcode === 4) {
+                this.io.write(instruction.getParam(0));
                 this.position += 2;
-            } else if (opcode.opcode === 5) {
-                this.position = this.executeOp(opcode, (a, b) => a !== 0 ? b : this.position + 3);
-            } else if (opcode.opcode === 6) {
-                this.position = this.executeOp(opcode, (a, b) => a === 0 ? b : this.position + 3);
-            } else if (opcode.opcode === 7) {
-                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a < b ? 1 : 0);
+            } else if (instruction.opcode === 5) {
+                this.position = instruction.executeBinary((a, b) => a !== 0 ? b : this.position + 3);
+            } else if (instruction.opcode === 6) {
+                this.position = instruction.executeBinary((a, b) => a === 0 ? b : this.position + 3);
+            } else if (instruction.opcode === 7) {
+                instruction.setParam(2, instruction.executeBinary((a, b) => a < b ? 1 : 0));
                 this.position += 4;
-            } else if (opcode.opcode === 8) {
-                this.program[this.program[this.position + 3]] = this.executeOp(opcode, (a, b) => a === b ? 1 : 0);
+            } else if (instruction.opcode === 8) {
+                instruction.setParam(2, instruction.executeBinary((a, b) => a === b ? 1 : 0));
                 this.position += 4;
+            } else if (instruction.opcode === 9) {
+                this.relativeBase += instruction.getParam(0);
+                this.position += 2;
             } else {
                 throw new Error(`Wrong opcode at ${this.position}: ${this.program[this.position]}`);
             }
@@ -80,7 +92,17 @@ export class IntcodeProcessor {
         this.halted = true;
     }
 
-    private executeOp(opcode: Opcode, f: (a: number, b: number) => number) {
-        return opcode.executeOp(f)(this.program, this.position);
+}
+
+export class InMemoryIO implements IO {
+    public input: number[] = [];
+    public output: number[] = [];
+
+    public read() {
+        return this.input.shift();
+    }
+
+    public write(v: number) {
+        this.output.push(v);
     }
 }

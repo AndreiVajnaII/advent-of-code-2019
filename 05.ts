@@ -6,6 +6,6 @@ export function solve(lines: string[]) {
     let result: number | undefined;
     const read = () => input.pop();
     const write = (v: number) => { result = v; };
-    new IntcodeProcessor(program, { read, write }).execute();
+    new IntcodeProcessor(program, { read, write }).run();
     return result;
 }

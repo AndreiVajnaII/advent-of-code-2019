@@ -1,29 +1,15 @@
-import { IntcodeProcessor, IO } from "./intcode";
+import { InMemoryIO, IntcodeProcessor } from "./intcode";
 
 type PhaseSetting = [number, number, number, number, number];
 
-class AmpIO implements IO {
-
-    public input: number[] = [];
-    public output: number[] = [];
-
-    public read() {
-        return this.input.shift();
-    }
-
-    public write(v: number) {
-        this.output.push(v);
-    }
-}
-
 class Amplifier {
 
-    public io: AmpIO;
+    public io: InMemoryIO;
 
     private proc: IntcodeProcessor;
 
     constructor(program: number[]) {
-        this.io = new AmpIO();
+        this.io = new InMemoryIO();
         this.proc = new IntcodeProcessor(program, this.io);
     }
 
@@ -32,7 +18,7 @@ class Amplifier {
     }
 
     public run() {
-        this.proc.execute();
+        this.proc.run();
     }
 }
 
