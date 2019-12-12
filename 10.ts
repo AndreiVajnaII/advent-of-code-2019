@@ -20,36 +20,37 @@ class LineOfSight {
             return false;
         }
         if (a.x === this.startX) {
-            return this.dx === 0;
+            return this.dx === 0 && Math.sign(a.y - this.startY) === Math.sign(this.dy);
         }
         if (a.y === this.startY) {
-            return this.dy === 0;
+            return this.dy === 0 && Math.sign(a.x - this.startX) === Math.sign(this.dx);
         }
         return (a.x - this.startX) / this.dx === (a.y - this.startY) / this.dy
-            && Math.sign(a.x - this.startX) === Math.sign(a.y - this.startY);
+            && Math.sign(a.x - this.startX) === Math.sign(this.dx)
+            && Math.sign(a.y - this.startY) === Math.sign(this.dy);
     }
 }
 
 export function solve(lines: string[]) {
-    // lines = [
-    //     "......#.#.",
-    //     "#..#.#....",
-    //     "..#######.",
-    //     ".#.#.###..",
-    //     ".#..#.....",
-    //     "..#....#.#",
-    //     "#..#....#.",
-    //     ".##.#..###",
-    //     "##...#..#.",
-    //     ".#....####",
-    // ];
     lines = [
-        ".#..#",
-        ".....",
-        "#####",
-        "....#",
-        "...##",
-    ]
+        "......#.#.",
+        "#..#.#....",
+        "..#######.",
+        ".#.#.###..",
+        ".#..#.....",
+        "..#....#.#",
+        "#..#....#.",
+        ".##.#..###",
+        "##...#..#.",
+        ".#....####",
+    ];
+    // lines = [
+    //     ".#..#",
+    //     ".....",
+    //     "#####",
+    //     "....#",
+    //     "...##",
+    // ];
     const [a, r] = new MonitoringStationFinder(lines).findBest();
     console.log(a.x, a.y, r);
 }
@@ -65,8 +66,6 @@ class MonitoringStationFinder {
         this.h = lines.length;
         this.asteroids = lines.join("").split("").map((v, i) => [v, i] as const).filter(([v, _]) => v === "#")
             .map(([_, i]) => new Asteroid(i % this.w, Math.floor(i / this.h)));
-        // this.asteroids.forEach(a => console.log(a.x, a.y));
-        console.log(this.asteroids.length);
     }
 
     public findBest() {
@@ -85,17 +84,18 @@ class MonitoringStationFinder {
 
     public linesOfSight(startX: number, startY: number): LineOfSight[] {
         const linesOfSight: LineOfSight[] = [];
-        linesOfSight.push(new LineOfSight(startX, startY, 0, 1));
-        linesOfSight.push(new LineOfSight(startX, startY, 1, 0));
-        for (let x = startX + 1; x < this.w; x++) {
-            for (let y = startY + 1; y < this.h; y++) {
+        // linesOfSight.push(new LineOfSight(startX, startY, 0, 1));
+        // linesOfSight.push(new LineOfSight(startX, startY, 1, 0));
+        for (let x = 0; x < this.w; x++) {
+            for (let y = 0; y < this.h; y++) {
+                if (x === startX && y === startY) {
+                    continue;
+                }
                 const dx = x - startX;
                 const dy = y - startY;
-                if (dx === 1 || dy === 1 || (dx % dy !== 0 && dy % dx !== 0)) {
+                if (Math.abs(dx) === 1 || Math.abs(dy) === 1
+                    || (dx % dy !== 0 && dy % dx !== 0)) {
                     linesOfSight.push(new LineOfSight(startX, startY, dx, dy));
-                    linesOfSight.push(new LineOfSight(startX, startY, -dx, dy));
-                    linesOfSight.push(new LineOfSight(startX, startY, dx, -dy));
-                    linesOfSight.push(new LineOfSight(startX, startY, -dx, -dy));
                 }
             }
         }
