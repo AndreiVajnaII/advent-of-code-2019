@@ -32,27 +32,8 @@ class LineOfSight {
 }
 
 export function solve(lines: string[]) {
-    lines = [
-        "......#.#.",
-        "#..#.#....",
-        "..#######.",
-        ".#.#.###..",
-        ".#..#.....",
-        "..#....#.#",
-        "#..#....#.",
-        ".##.#..###",
-        "##...#..#.",
-        ".#....####",
-    ];
-    // lines = [
-    //     ".#..#",
-    //     ".....",
-    //     "#####",
-    //     "....#",
-    //     "...##",
-    // ];
     const [a, r] = new MonitoringStationFinder(lines).findBest();
-    console.log(a.x, a.y, r);
+    return [a.x, a.y, r];
 }
 
 class MonitoringStationFinder {
@@ -70,10 +51,6 @@ class MonitoringStationFinder {
 
     public findBest() {
         return this.asteroids.map(a => [a, this.countSeenAsteroids(a)] as const)
-            .map(v => {
-                console.log(v[0].x, v[0].y, v[1]);
-                return v;
-            })
             .reduce(([amax, max], [a, v]) => v > max ? [a, v] : [amax, max]);
     }
 
@@ -84,8 +61,6 @@ class MonitoringStationFinder {
 
     public linesOfSight(startX: number, startY: number): LineOfSight[] {
         const linesOfSight: LineOfSight[] = [];
-        // linesOfSight.push(new LineOfSight(startX, startY, 0, 1));
-        // linesOfSight.push(new LineOfSight(startX, startY, 1, 0));
         for (let x = 0; x < this.w; x++) {
             for (let y = 0; y < this.h; y++) {
                 if (x === startX && y === startY) {
@@ -93,12 +68,28 @@ class MonitoringStationFinder {
                 }
                 const dx = x - startX;
                 const dy = y - startY;
-                if (Math.abs(dx) === 1 || Math.abs(dy) === 1
-                    || (dx % dy !== 0 && dy % dx !== 0)) {
+                if (gcd(Math.abs(dx), Math.abs(dy)) === 1) {
                     linesOfSight.push(new LineOfSight(startX, startY, dx, dy));
                 }
             }
         }
         return linesOfSight;
+    }
+}
+
+function gcd(a: number, b: number): number {
+    if (a === 0) {
+        return b;
+    }
+    if (b === 0) {
+        return a;
+    }
+    if (a === b) {
+        return a;
+    }
+    if (a > b) {
+        return gcd(a - b, b);
+    } else {
+        return gcd(a, b - a);
     }
 }
