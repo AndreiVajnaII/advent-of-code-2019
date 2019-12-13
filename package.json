@@ -12,7 +12,7 @@
   "dependencies": {
     "request": "^2.88.0",
     "tslint": "^5.20.1",
-    "typescript": "^3.6.3"
+    "typescript": "^3.7.3"
   },
   "devDependencies": {
     "@types/request": "^2.48.3"

@@ -24,6 +24,8 @@ class Instruction {
                     return position + index + 1;
                 case 2:
                     return relativeBase + program[position + index + 1];
+                default:
+                    throw new Error(`Invalid mode ${this.modes[index]} at index ${index}`);
             }
         };
         this.getParam = index => {
