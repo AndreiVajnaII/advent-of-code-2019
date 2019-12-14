@@ -9,7 +9,12 @@ export function readInput(inputUrl: string, cookie: string, parseInput: (lines: 
         } else {
             const lines = body.split("\n");
             lines.pop();
-            console.log(parseInput(lines));
+            const result = parseInput(lines);
+            if (result instanceof Promise) {
+                result.then(console.log);
+            } else {
+                console.log(result);
+            }
         }
     });
 }

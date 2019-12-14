@@ -107,4 +107,13 @@ export class InMemoryIO implements IO {
     public write(v: number) {
         this.output.push(v);
     }
+
+    public shift() {
+        const v = this.output.shift();
+        if (v === undefined) {
+            throw new Error("No output!");
+        } else {
+            return v;
+        }
+    }
 }
