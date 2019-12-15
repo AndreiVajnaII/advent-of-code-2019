@@ -10,24 +10,38 @@ type Reactions = Map<string, Reaction>;
 
 export function solve(lines: string[]) {
     const reactions = parseReactions(lines);
-    return transform(reactions, "FUEL").needed.get("ORE");
+    return transform(parseFormula("1 FUEL"), reactions).get("ORE");
 }
 
-function transform(reactions: Reactions, element: string) {
-    let reaction = reactions.get(element)!;
-    let formula = reaction.formula;
+function transform(formula: Formula, reactions: Reactions) {
     while (!completelyTransformed(formula)) {
         const oldFormula = formula;
         formula = new Map<string, number>();
-        for (const [name, q] of oldFormula) {
+        for (const [name, oldQuantity] of oldFormula) {
             if (name === "ORE") {
-                addChemical(formula, name, q);
-            } else {
-                reaction = reactions.get(name)!;
-                reaction.f
+                addChemical(formula, "ORE", oldQuantity);
+            } else if (oldQuantity > 0) {
+                const reaction = reactions.get(name)!;
+                const multiplier = Math.ceil(oldQuantity / reaction.quantity);
+                reaction.formula.forEach((q, n) => {
+                    addChemical(formula, n, q * multiplier);
+                });
+                if (oldQuantity % reaction.quantity !== 0) {
+                    addChemical(formula, name, (oldQuantity % reaction.quantity) - reaction.quantity);
+                }
             }
         }
     }
+    printFormula(formula);
+    return formula;
+}
+
+function printFormula(formula: Formula) {
+    let s = "";
+    formula.forEach((q, n) => {
+        s += `${q} ${n}, `;
+    });
+    console.log(s);
 }
 
 function addChemical(formula: Formula, name: string, q: number) {
@@ -35,7 +49,11 @@ function addChemical(formula: Formula, name: string, q: number) {
     if (existing !== undefined) {
         q += existing;
     }
-    formula.set(name, q);
+    if (q !== 0) {
+        formula.set(name, q);
+    } else {
+        formula.delete(name);
+    }
 }
 
 function completelyTransformed(formula: Formula) {
