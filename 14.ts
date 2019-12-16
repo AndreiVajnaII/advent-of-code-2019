@@ -8,9 +8,19 @@ class Reaction {
 
 type Reactions = Map<string, Reaction>;
 
+const trillion = 1000000000000;
+
 export function solve(lines: string[]) {
     const reactions = parseReactions(lines);
-    return transform(parseFormula("1 FUEL"), reactions).get("ORE");
+    const orePerFuel = transform(parseFormula("1 FUEL"), reactions).get("ORE")!;
+    let guess = Math.ceil(trillion / orePerFuel);
+    let ore = 0;
+    do {
+        ore = transform(parseFormula(`${guess} FUEL`), reactions).get("ORE")!;
+        console.log(guess, ore);
+        const error = 1 - ore / trillion;
+        guess += Math.ceil(0.5 * guess * error);
+    } while (ore < trillion);
 }
 
 function transform(formula: Formula, reactions: Reactions) {
@@ -32,7 +42,6 @@ function transform(formula: Formula, reactions: Reactions) {
             }
         }
     }
-    printFormula(formula);
     return formula;
 }
 
