@@ -1,4 +1,5 @@
 import { InMemoryIO, IntcodeProcessor } from "./intcode";
+import { ValuesOf } from "./utils";
 
 const directions = [1, 2, 3, 4] as const;
 
@@ -17,7 +18,7 @@ class Droid {
         this.proc = new IntcodeProcessor(program, this.io);
     }
 
-    public move(direction: 1 | 2 | 3 | 4) {
+    public move(direction: ValuesOf<typeof directions>) {
         this.io.input.push(direction);
         this.proc.run();
     }
