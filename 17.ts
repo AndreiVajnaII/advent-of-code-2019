@@ -3,7 +3,7 @@ import { InMemoryIO, IntcodeProcessor } from "./intcode";
 export function solve(lines: string[]) {
     const program = lines[0].split(",").map(s => +s);
     const io = new InMemoryIO();
-    const proc = new IntcodeProcessor(program, io);
+    const proc = new IntcodeProcessor([...program], io);
     proc.run();
     let row = 0;
     const map: string[] = [];
@@ -27,7 +27,14 @@ export function solve(lines: string[]) {
         }
     }
 
-    return computeMovement(map);
+    const movements = computeMovement(map);
+    console.log(movements.join(","));
+    const A = "L,4,L,4,L,6,R,10,L,6";
+    const B = "L,12,L,6,R,10,L,6";
+    const C = "R,8,R,10,L,6";
+    const routine = "A,A,B,C,C,A,C,B,C,B";
+
+    return runRobot([...program], A, B, C, routine);
 }
 
 function isIntersection(x: number, y: number, map: string[]) {
@@ -56,7 +63,7 @@ function computeMovement(map: string[]) {
         moveForward(movements, map);
     }
 
-    return movements.join(",");
+    return movements;
 }
 
 type Turn = "<" | ">" | "^" | "v";
@@ -114,4 +121,25 @@ function moveForward(movements: string[], map: string[]) {
 function isScaffolding(map: string [], x: number, y: number) {
     return x >= 0 && x < map[0].length && y >= 0 && y < map.length
         && map[y][x] === "#";
+}
+
+function runRobot(program: number[], A: string, B: string, C: string, routine: string) {
+    program[0] = 2;
+    const io = new InMemoryIO();
+    writeInstruction(io.input, routine);
+    writeInstruction(io.input, A);
+    writeInstruction(io.input, B);
+    writeInstruction(io.input, C);
+    writeInstruction(io.input, "y");
+
+    const robot = new IntcodeProcessor(program, io);
+    robot.run();
+    return io.output[io.output.length - 1];
+}
+
+function writeInstruction(arr: number[], instruction: string) {
+    for (let i = 0; i < instruction.length; i++) {
+        arr.push(instruction.charCodeAt(i));
+    }
+    arr.push(10); // newline
 }
