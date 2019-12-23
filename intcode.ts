@@ -116,4 +116,23 @@ export class InMemoryIO implements IO {
             return v;
         }
     }
+
+}
+
+export class AsciiIO extends InMemoryIO {
+
+    public writeInstruction(instruction: string) {
+        for (let i = 0; i < instruction.length; i++) {
+            this.input.push(instruction.charCodeAt(i));
+        }
+        this.input.push(10); // newline
+    }
+
+    public readString() {
+        let s = "";
+        while (this.output.length > 0 && this.output[0] < 128) {
+            s += String.fromCharCode(this.output.shift()!);
+        }
+        return s;
+    }
 }
