@@ -1,35 +1,77 @@
 import { isUpperCase } from "./utils";
 
 export function solve(lines: string[]) {
-    lines = [
-        "         A           ",
-        "         A           ",
-        "  #######.#########  ",
-        "  #######.........#  ",
-        "  #######.#######.#  ",
-        "  #######.#######.#  ",
-        "  #######.#######.#  ",
-        "  #####  B    ###.#  ",
-        "BC...##  C    ###.#  ",
-        "  ##.##       ###.#  ",
-        "  ##...DE  F  ###.#  ",
-        "  #####    G  ###.#  ",
-        "  #########.#####.#  ",
-        "DE..#######...###.#  ",
-        "  #.#########.###.#  ",
-        "FG..#########.....#  ",
-        "  ###########.#####  ",
-        "             Z       ",
-        "             Z       ",
-    ];
+    // lines = [
+    //     "         A           ",
+    //     "         A           ",
+    //     "  #######.#########  ",
+    //     "  #######.........#  ",
+    //     "  #######.#######.#  ",
+    //     "  #######.#######.#  ",
+    //     "  #######.#######.#  ",
+    //     "  #####  B    ###.#  ",
+    //     "BC...##  C    ###.#  ",
+    //     "  ##.##       ###.#  ",
+    //     "  ##...DE  F  ###.#  ",
+    //     "  #####    G  ###.#  ",
+    //     "  #########.#####.#  ",
+    //     "DE..#######...###.#  ",
+    //     "  #.#########.###.#  ",
+    //     "FG..#########.....#  ",
+    //     "  ###########.#####  ",
+    //     "             Z       ",
+    //     "             Z       ",
+    // ];
     const maze = new Maze(lines);
-    maze.print();
+    let start: Gate;
+    for (const g of maze.paths.keys()) {
+        if (g.label === "AA-") {
+            start = g;
+        }
+    }
+    return shortestPath(maze.paths, start!, [start!]);
+}
+
+function shortestPath(
+    gates: Map<Gate, Map<Gate, number>>,
+    current: Gate,
+    path: Gate[] = [],
+    steps = 0) {
+    if (current.label === "ZZ-") {
+        return steps - 1;
+    } else {
+        const result: number[] = [];
+        gates.get(current)!.forEach((s, g) => {
+            if (!path.includes(g)) {
+                const pairGate = findPair(gates, g)!;
+                result.push(shortestPath(gates, pairGate, [...path, g, pairGate], steps + s + 1));
+            }
+        });
+        return result.reduce((min, x) => x < min ? x : min, Infinity);
+    }
+}
+
+function findPair(gates: Map<Gate, Map<Gate, number>>, gate: Gate) {
+    if (gate.label === "ZZ-") {
+        return gate;
+    }
+    let label = gate.label;
+    if (label[2] === "+") {
+        label = label.replace("+", "-");
+    } else {
+        label = label.replace("-", "+");
+    }
+    for (const g of gates.keys()) {
+        if (g.label === label) {
+            return g;
+        }
+    }
 }
 
 class Maze {
+    public paths = new Map<Gate, Map<Gate, number>>();
     private width: number;
     private height: number;
-    private paths = new Map<Gate, Map<Gate, number>>();
 
     constructor(private map: string[]) {
         this.width = map[0].length;
@@ -37,14 +79,6 @@ class Maze {
         this.findGates();
         this.paths.forEach((paths, gate) => {
             this.findPaths(gate.exit, [gate.label1, gate.label2], paths);
-        });
-    }
-
-    public print() {
-        this.paths.forEach((path, gate) => {
-            path.forEach((steps, otherGate) => {
-                console.log(gate.label, otherGate.label, steps);
-            });
         });
     }
 
@@ -85,7 +119,7 @@ class Maze {
         if (isUpperCase(this.map[row][col])) {
             const gate = this.getGate(row, col)!;
             result.set(gate,
-                Math.min(path.length - 2, result.get(gate) || Infinity));
+                Math.min(path.length - 3, result.get(gate) || Infinity));
         } else {
             this.neighbours(row, col)
                 .filter(([newRow, newCol]) => !path.some(([r, c]) => r === newRow && c === newCol))
