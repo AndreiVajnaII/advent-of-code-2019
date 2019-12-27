@@ -1,27 +1,6 @@
 import { isUpperCase } from "./utils";
 
 export function solve(lines: string[]) {
-    // lines = [
-    //     "         A           ",
-    //     "         A           ",
-    //     "  #######.#########  ",
-    //     "  #######.........#  ",
-    //     "  #######.#######.#  ",
-    //     "  #######.#######.#  ",
-    //     "  #######.#######.#  ",
-    //     "  #####  B    ###.#  ",
-    //     "BC...##  C    ###.#  ",
-    //     "  ##.##       ###.#  ",
-    //     "  ##...DE  F  ###.#  ",
-    //     "  #####    G  ###.#  ",
-    //     "  #########.#####.#  ",
-    //     "DE..#######...###.#  ",
-    //     "  #.#########.###.#  ",
-    //     "FG..#########.....#  ",
-    //     "  ###########.#####  ",
-    //     "             Z       ",
-    //     "             Z       ",
-    // ];
     const maze = new Maze(lines);
     let start: Gate;
     for (const g of maze.paths.keys()) {
@@ -29,7 +8,9 @@ export function solve(lines: string[]) {
             start = g;
         }
     }
-    return shortestPath(maze.paths, start!, [start!]);
+    return [
+        shortestPath(maze.paths, start!, [start!]),
+        shortestPathRec(maze.paths, start!, [[start!, 0]])];
 }
 
 function shortestPath(
@@ -45,6 +26,33 @@ function shortestPath(
             if (!path.includes(g)) {
                 const pairGate = findPair(gates, g)!;
                 result.push(shortestPath(gates, pairGate, [...path, g, pairGate], steps + s + 1));
+            }
+        });
+        return result.reduce((min, x) => x < min ? x : min, Infinity);
+    }
+}
+
+function shortestPathRec(
+    gates: Map<Gate, Map<Gate, number>>,
+    current: Gate,
+    path: Array<[Gate, number]>,
+    level = 0,
+    steps = 0) {
+    if (current.label === "ZZ-") {
+        return steps - 1;
+    } else if (level < 0 || level >= 30) {
+        return Infinity;
+    } else {
+        const result: number[] = [];
+        gates.get(current)!.forEach((s, gate) => {
+            if (gate.label !== "AA-"
+                && !path.some(([g, l]) => g === gate && l === level)
+                && !(gate.label === "ZZ-" && level > 0)) {
+                const pairGate = findPair(gates, gate)!;
+                const nextLevel = level + gate.levelInc;
+                result.push(shortestPathRec(gates, pairGate,
+                    [...path, [gate, level], [pairGate, nextLevel]],
+                    nextLevel, steps + s + 1));
             }
         });
         return result.reduce((min, x) => x < min ? x : min, Infinity);
@@ -135,9 +143,13 @@ class Maze {
 }
 
 class Gate {
+    public levelInc: number;
+
     constructor(
         public label: string,
         public exit: [number, number],
         public label1: [number, number],
-        public label2: [number, number]) { }
+        public label2: [number, number]) {
+        this.levelInc = label[2] === "+" ? 1 : -1;
+    }
 }
