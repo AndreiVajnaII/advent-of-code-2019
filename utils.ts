@@ -3,3 +3,7 @@ export type ValuesOf<T extends readonly any[]> = T extends ReadonlyArray<infer R
 export function isUpperCase(s: string) {
     return s.charCodeAt(0) >= "A".charCodeAt(0) && s.charCodeAt(0) <= "Z".charCodeAt(0);
 }
+
+export function isLowerCase(s: string) {
+    return s.charCodeAt(0) >= "a".charCodeAt(0) && s.charCodeAt(0) <= "z".charCodeAt(0);
+}
