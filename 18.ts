@@ -1,13 +1,17 @@
 import { isLowerCase, isUpperCase } from "./utils";
 
 export function solve(lines: string[]) {
-    // lines = [
-    //     "########################",
-    //     "#f.D.E.e.C.b.A.@.a.B.c.#",
-    //     "######################.#",
-    //     "#d.....................#",
-    //     "########################",
-    // ];
+    lines = [
+        "#################",
+        "#i.G..c...e..H.p#",
+        "########.########",
+        "#j.A..b...f..D.o#",
+        "########@########",
+        "#k.E..a...g..B.n#",
+        "########.########",
+        "#l.F..d...h..C.m#",
+        "#################",
+    ];
     const maze = new Maze(lines);
     maze.print();
 }
@@ -17,81 +21,93 @@ class Maze {
     private height: number;
     private startRow: number;
     private startCol: number;
-    private keys: Key[] = [];
-    private paths = new Map<string, Map<string, Path>>();
+    private graph = new Map<string, Map<string, EdgeData>>();
 
     constructor(private map: string[]) {
         this.height = map.length;
         this.width = map[0].length;
         this.startRow = map.findIndex(row => row.includes("@"));
         this.startCol = map[this.startRow].indexOf("@");
-        this.findKeys();
-        this.findPaths();
+        this.buildGraph();
     }
 
     public print() {
-        for (const [start, paths] of this.paths) {
-            for (const [end, p] of paths) {
-                console.log(start, end, p.steps, p.keysNeeded.join(""));
+        for (const [start, edge] of this.graph) {
+            for (const [end, data] of edge) {
+                console.log(start, end, data.distance, data.keys.join(""));
             }
         }
     }
 
-    private findKeys() {
+    private buildGraph() {
+        const visitData = new Array<VisitData[]>(this.height);
         for (let row = 0; row < this.height; row++) {
-            for (let col = 0; col < this.width; col++) {
+            visitData[row] = new Array<VisitData>(this.width);
+        }
+        visitData[this.startRow][this.startCol] = new VisitData(0, "@", 0, []);
+        let toVisit: Array<[number, number, VisitData]> = [];
+        this.findNextToVisit(this.startRow, this.startCol, visitData, toVisit, new VisitData(1, "@", 0, []));
+        while (toVisit.length > 0) {
+            const nextToVisit: Array<[number, number, VisitData]> = [];
+            for (const [row, col, prevData] of toVisit) {
+                visitData[row][col] = prevData;
+                const nextData: VisitData = prevData.next();
                 if (isLowerCase(this.map[row][col])) {
-                    this.keys.push(new Key(this.map[row][col], row, col));
+                    this.addEdge(this.map[row][col], prevData.lastKey,
+                        prevData.steps - prevData.lastSteps, prevData.neededKeys);
+                    nextData.lastKey = this.map[row][col];
+                    nextData.lastSteps = prevData.steps;
+                    nextData.neededKeys = [];
                 }
+                if (isUpperCase(this.map[row][col])) {
+                    nextData.neededKeys.push(this.map[row][col].toLowerCase());
+                }
+                this.findNextToVisit(row, col, visitData, nextToVisit, nextData);
             }
+            toVisit = nextToVisit;
         }
     }
 
-    private findPaths() {
-        for (const start of [{ name: "@", row: this.startRow, col: this.startCol }, ...this.keys]) {
-            const paths = new Map<string, Path>();
-            this.paths.set(start.name, paths);
-            for (const end of this.keys) {
-                if (start !== end) {
-                    paths.set(end.name, this.findPath(start, end));
-                }
-            }
-        }
+    private findNextToVisit(
+        row: number, col: number, visitData: VisitData[][],
+        toVisit: Array<[number, number, VisitData]>, nextData: VisitData) {
+        [[1, 0], [-1, 0], [0, 1], [0, -1]]
+            .map(([dr, dc]) => [row + dr, col + dc])
+            .filter(([newRow, newCol]) => this.map[newRow][newCol] !== "#"
+                && visitData[newRow][newCol] === undefined)
+            .forEach(([newRow, newCol]) => {
+                toVisit.push([newRow, newCol, nextData]);
+            });
     }
 
-    private findPath({ row, col }: Point, endKey: Key, path: Array<[number, number]> = [], keys: string[] = []): Path {
-        if (this.map[row][col] === endKey.name) {
-            return new Path(path.length, keys);
-        } else {
-            return [[1, 0], [-1, 0], [0, 1], [0, -1]]
-                .map(([dr, dc]) => [row + dr, col + dc])
-                .filter(([newRow, newCol]) => newRow >= 0 && newRow < this.height && newCol >= 0 && newCol < this.width)
-                .filter(([newRow, newCol]) => !path.some(([r, c]) => r === newRow && c === newCol))
-                .filter(([newRow, newCol]) => this.map[newRow][newCol] !== "#")
-                .map(([newRow, newCol]) => {
-                    const newKeys = [...keys];
-                    if (isUpperCase(this.map[newRow][newCol])) {
-                        newKeys.push(this.map[newRow][newCol]);
-                    }
-                    return this.findPath({ row: newRow, col: newCol }, endKey, [...path, [row, col]], newKeys);
-                }).reduce((min, p) => p.steps < min.steps ? p : min, new Path(Infinity, []));
-        }
+    private addEdge(a: string, b: string, distance: number, neededKeys: string[]) {
+        this.addUniEdge(a, b, distance, neededKeys);
+        this.addUniEdge(b, a, distance, neededKeys);
     }
+
+    private addUniEdge(a: string, b: string, distance: number, neededKeys: string[]) {
+        if (!this.graph.has(a)) {
+            this.graph.set(a, new Map());
+        }
+        this.graph.get(a)!.set(b, new EdgeData(distance, neededKeys));
+    }
+
 }
 
-class Point {
-    constructor(public row: number, public col: number) { }
-}
-
-class Key {
+class EdgeData {
     constructor(
-        public name: string,
-        public row: number,
-        public col: number) { }
+        public distance: number,
+        public keys: string[]) { }
 }
 
-class Path {
+class VisitData {
     constructor(
         public steps: number,
-        public keysNeeded: string[]) { }
+        public lastKey: string,
+        public lastSteps: number,
+        public neededKeys: string[]) { }
+
+    public next() {
+        return new VisitData(this.steps + 1, this.lastKey, this.lastSteps, [...this.neededKeys]);
+    }
 }
