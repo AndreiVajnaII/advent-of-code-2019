@@ -1,23 +1,8 @@
 import { isLowerCase, isUpperCase } from "./utils";
 
 export function solve(lines: string[]) {
-    // lines = [
-    //     "########################",
-    //     "#@..............ac.GI.b#",
-    //     "###d#e#f################",
-    //     "###A#B#C################",
-    //     "###g#h#i################",
-    //     "########################",
-    // ];
-    // lines = [
-    //     "########################",
-    //     "#f.D.E.e.C.b.A.@.a.B.c.#",
-    //     "######################.#",
-    //     "#d.....................#",
-    //     "########################",
-    // ];
     const maze = new Maze(lines);
-    return maze.solve();
+    return [maze.solve(), maze.deployRobots()];
 }
 
 class Maze {
@@ -30,54 +15,68 @@ class Maze {
         this.height = map.length;
         this.width = map[0].length;
         this.keys = this.map.join("").split("").filter(isLowerCase);
-        this.findPaths("@");
-        this.keys.forEach(key => this.findPaths(key));
-    }
-
-    public print() {
-        for (const [start, edge] of this.graph) {
-            for (const [end, data] of edge) {
-                console.log(start, end, data.distance, data.keysNeeded.join(""), data.keysFound.join(""));
-            }
-        }
     }
 
     public solve() {
+        this.findPaths("@");
+        this.keys.forEach(key => this.findPaths(key));
+        return this.findSolution(["@", sortedString("")], (node, keys) => this.neighbours(node, keys));
+    }
+
+    public deployRobots() {
+        const [centerRow, centerCol] = this.locationOf("@");
+        const row1 = this.map[centerRow - 1].split("");
+        row1[centerCol - 1] = "1";
+        row1[centerCol] = "#";
+        row1[centerCol + 1] = "2";
+        this.map[centerRow - 1] = row1.join("");
+        const row2 = this.map[centerRow].split("");
+        row2[centerCol - 1] = "#";
+        row2[centerCol] = "#";
+        row2[centerCol + 1] = "#";
+        this.map[centerRow] = row2.join("");
+        const row3 = this.map[centerRow + 1].split("");
+        row3[centerCol - 1] = "3";
+        row3[centerCol] = "#";
+        row3[centerCol + 1] = "4";
+        this.map[centerRow + 1] = row3.join("");
+        this.graph = new Map<string, Map<string, EdgeData>>();
+        ["1", "2", "3", "4"].forEach(robot => this.findPaths(robot));
+        this.keys.forEach(key => this.findPaths(key));
+        return this.findSolution(["1234", sortedString("")],
+            (node, keys) => this.neighboursRobots(node, keys));
+    }
+
+    private findSolution(
+        initialState: [string, SortedString],
+        neighbours: (node: string, keys: SortedString) => Array<readonly [string, EdgeData]>) {
         const toVisit = new Array<[string, SortedString]>();
-        const toVisitMap = new Map<string, Set<SortedString>>();
-        toVisit.push(["@", sortedString("")]);
-        const visited = new Map<string, Set<SortedString>>();
-        const distances = new Map<string, Map<SortedString, number>>();
-        this.keys.forEach(key => {
-            visited.set(key, new Set());
-            toVisitMap.set(key, new Set());
-            distances.set(key, new Map());
-        });
-        visited.set("@", new Set());
-        toVisitMap.set("@", new Set());
-        distances.set("@", new Map());
-        distances.get("@")!.set(sortedString(""), 0);
+        const toVisitMap = new DefaultSet<string, SortedString>();
+        toVisit.push(initialState);
+        const visited = new DefaultSet<string, SortedString>();
+        const distances = new DefaultMap<string, SortedString, number>();
+        distances.get(initialState[0])!.set(initialState[1], 0);
         while (toVisit.length > 0) {
             const [node, collectedKeys] = toVisit.shift()!;
             if (collectedKeys.length === this.keys.length) {
-                return distances.get(node)!.get(collectedKeys);
+                return distances.get(node).get(collectedKeys);
             }
-            toVisitMap.get(node)!.delete(collectedKeys);
-            const distance = distances.get(node)!.get(collectedKeys)!;
-            for (const [neighbour, edge] of this.neighbours(node, collectedKeys)) {
+            toVisitMap.get(node).delete(collectedKeys);
+            const distance = distances.get(node).get(collectedKeys)!;
+            for (const [neighbour, edge] of neighbours(node, collectedKeys)) {
                 const newKeys = addKeys(collectedKeys, neighbour, edge.keysFound.join(""));
-                if (!visited.get(neighbour)!.has(newKeys)) {
-                    distances.get(neighbour)!.set(newKeys,
+                if (!visited.get(neighbour).has(newKeys)) {
+                    distances.get(neighbour).set(newKeys,
                         Math.min(distance + edge.distance,
-                            distances.get(neighbour)!.get(newKeys) || Infinity));
-                    if (!toVisitMap.get(neighbour)!.has(newKeys)) {
+                            distances.get(neighbour).get(newKeys) || Infinity));
+                    if (!toVisitMap.get(neighbour).has(newKeys)) {
                         toVisit.push([neighbour, newKeys]);
-                        toVisitMap.get(neighbour)!.add(newKeys);
+                        toVisitMap.get(neighbour).add(newKeys);
                     }
                 }
             }
-            visited.get(node)!.add(collectedKeys);
-            toVisit.sort(([n1, k1], [n2, k2]) => distances.get(n1)!.get(k1)! - distances.get(n2!)?.get(k2)!);
+            visited.get(node).add(collectedKeys);
+            toVisit.sort(([n1, k1], [n2, k2]) => distances.get(n1).get(k1)! - distances.get(n2).get(k2)!);
         }
     }
 
@@ -85,6 +84,19 @@ class Maze {
         return this.keys.filter(n => !collectedKeys.includes(n)
             && this.isAccessible(this.graph.get(node)?.get(n), collectedKeys))
             .map(n => [n, this.graph.get(node)!.get(n)!] as const);
+    }
+
+    private neighboursRobots(node: string, collectedKeys: SortedString) {
+        const result: Array<readonly [string, EdgeData]> = [];
+        const robots = node.split("");
+        for (let i = 0; i < robots.length; i++) {
+            const newRobots = [...robots];
+            for (const [n, edge] of this.neighbours(robots[i], collectedKeys)) {
+                newRobots[i] = n;
+                result.push([newRobots.join(""), edge]);
+            }
+        }
+        return result;
     }
 
     private isAccessible(edge: EdgeData | undefined, collectedKeys: SortedString) {
@@ -167,7 +179,27 @@ function addKeys(...keys: string[]): SortedString {
         .reduce((r, k) => r.add(k), new Set<string>());
     const newKeys: string[] = [];
     set.forEach(k => newKeys.push(k));
-    return newKeys.sort().join("") as SortedString;
+    return newKeys.filter(isLowerCase).sort().join("") as SortedString;
 }
 
 type SortedString = string & { ___SORTED: boolean };
+
+class DefaultMap<K1, K2, V> extends Map<K1, Map<K2, V>> {
+
+    public get(key: K1) {
+        if (!this.has(key)) {
+            this.set(key, new Map<K2, V>());
+        }
+        return super.get(key)!;
+    }
+}
+
+class DefaultSet<K, V> extends Map<K, Set<V>> {
+
+    public get(key: K) {
+        if (!this.has(key)) {
+            this.set(key, new Set<V>());
+        }
+        return super.get(key)!;
+    }
+}
