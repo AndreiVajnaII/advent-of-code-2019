@@ -10,11 +10,13 @@
   "author": "Andrei Vajna",
   "license": "ISC",
   "dependencies": {
+    "readline-sync": "^1.4.10",
     "request": "^2.88.0",
     "tslint": "^5.20.1",
     "typescript": "^3.7.3"
   },
   "devDependencies": {
+    "@types/readline-sync": "^1.4.3",
     "@types/request": "^2.48.3"
   }
 }
