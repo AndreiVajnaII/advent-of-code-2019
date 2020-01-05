@@ -15,8 +15,7 @@ class Beam {
 
 export function solve(lines: string[]) {
     const beam = new Beam(lines[0].split(",").map(s => +s));
-    // return coverage(beam, 50, 50);
-    return findRect(beam, 100, 100);
+    return [coverage(beam, 50, 50), findRect(beam, 100, 100)];
 }
 
 function coverage(beam: Beam, width: number, height: number) {
