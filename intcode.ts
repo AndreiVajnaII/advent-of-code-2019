@@ -53,7 +53,7 @@ export class IntcodeProcessor {
     private position = 0;
     private relativeBase = 0;
 
-    constructor(private program: number[], private io: IO) { }
+    constructor(private program: number[], public io: IO) { }
 
     public run() {
         while (this.program[this.position] !== 99) {
