@@ -1,4 +1,4 @@
-import { ValuesOf } from "../utils";
+import { ValuesOf } from "../../utils";
 import { InMemoryIO, IntcodeProcessor } from "./intcode";
 
 const directions = [1, 2, 3, 4] as const;
