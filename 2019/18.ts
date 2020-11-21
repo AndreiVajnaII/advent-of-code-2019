@@ -1,4 +1,4 @@
-import { isLowerCase, isUpperCase } from "./utils";
+import { isLowerCase, isUpperCase } from "../utils";
 
 export function solve(lines: string[]) {
     const maze = new Maze(lines);
