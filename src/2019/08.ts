@@ -2,6 +2,7 @@ function countDigits(layer: number[], digit: number) {
     return layer.filter(x => x === digit).length;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function checkImage(layers: number[][]) {
     const minLayer = layers[layers
         .map(layer => countDigits(layer, 0))

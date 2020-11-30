@@ -18,19 +18,17 @@ class Instruction {
         ];
         this.resolveParamIndex = index => {
             switch (this.modes[index]) {
-                case 0:
-                    return program[position + index + 1];
-                case 1:
-                    return position + index + 1;
-                case 2:
-                    return relativeBase + program[position + index + 1];
-                default:
-                    throw new Error(`Invalid mode ${this.modes[index]} at index ${index}`);
+            case 0:
+                return program[position + index + 1];
+            case 1:
+                return position + index + 1;
+            case 2:
+                return relativeBase + program[position + index + 1];
+            default:
+                throw new Error(`Invalid mode ${this.modes[index]} at index ${index}`);
             }
         };
-        this.getParam = index => {
-            return program[this.resolveParamIndex(index)] || 0;
-        };
+        this.getParam = index => program[this.resolveParamIndex(index)] || 0;
         this.setParam = (index, value) => {
             program[this.resolveParamIndex(index)] = value;
         };

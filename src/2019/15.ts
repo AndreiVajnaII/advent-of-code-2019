@@ -1,4 +1,4 @@
-import { ValuesOf } from "../../utils";
+import { ValuesOf } from "../utils";
 import { InMemoryIO, IntcodeProcessor } from "./intcode";
 
 const directions = [1, 2, 3, 4] as const;
@@ -44,7 +44,7 @@ class MapScanner {
     constructor(private droid: Droid) {
     }
 
-    get stepsToOxygen() {
+    public get stepsToOxygen() {
         return this.getMapCell(this.oxygenX, this.oxygenY)?.steps;
     }
 
@@ -64,7 +64,7 @@ class MapScanner {
                     this.droid.move(([2, 1, 4, 3] as const)[i]);
                     this.droid.readStatus();
                 } else if (status !== 0) {
-                    throw new Error("Invalid status " + status);
+                    throw new Error(`Invalid status ${status}`);
                 }
             }
         }
@@ -96,7 +96,7 @@ class MapScanner {
             .map(([newX, newY]) => this.getMapCell(newX, newY))
             .filter(cell => cell !== undefined)
             .map(cell => cell!)
-            .filter(cell => !this.oxygen.find(c => c.x === cell!.x && c.y === cell!.y));
+            .filter(cell => !this.oxygen.find(c => c.x === cell.x && c.y === cell.y));
     }
 }
 

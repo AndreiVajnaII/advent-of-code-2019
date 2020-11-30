@@ -1,6 +1,6 @@
 import request = require("request");
 
-export function readInput(inputUrl: string, cookie: string, parseInput: (lines: string[]) => any) {
+export function readInput(inputUrl: string, cookie: string, parseInput: (lines: string[]) => unknown) {
     request(inputUrl, { headers: { cookie } }, (err, res, body: string) => {
         if (res.statusCode !== 200) {
             console.error(err);
@@ -11,7 +11,7 @@ export function readInput(inputUrl: string, cookie: string, parseInput: (lines: 
             lines.pop();
             const result = parseInput(lines);
             if (result instanceof Promise) {
-                result.then(console.log);
+                result.then(console.log, console.error);
             } else {
                 console.log(result);
             }

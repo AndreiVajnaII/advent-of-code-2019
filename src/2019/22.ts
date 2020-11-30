@@ -102,7 +102,7 @@ function dealNewStack(stack: number[]) {
 }
 
 function stepwiseNewStack(stack: number[], step: number) {
-    const newStack: number[] = new Array(stack.length);
+    const newStack: number[] = new Array<number>(stack.length);
     let i = 0;
     while (stack.length > 0) {
         newStack[i] = stack.shift()!;

@@ -10,7 +10,7 @@ function part2(input: number[], phases: number) {
         all values of the phase below, starting with the offset up to the end. */
     const offset = +input.slice(0, 7).join("");
     const count = 10000 * input.length - offset;
-    const values: number[][] = new Array(count);
+    const values: number[][] = new Array<number[]>(count);
     for (let i = 0; i < count; i++) {
         values[i] = [input[input.length - i % input.length - 1]];
     }

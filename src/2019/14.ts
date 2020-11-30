@@ -45,6 +45,7 @@ function transform(formula: Formula, reactions: Reactions) {
     return formula;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function printFormula(formula: Formula) {
     let s = "";
     formula.forEach((q, n) => {

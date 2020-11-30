@@ -1,6 +1,5 @@
 import { InMemoryIO, IntcodeProcessor } from "./intcode";
 
-type Point = [number, number];
 type Direction = 0 | 90 | 180 | 270;
 class Panel {
     constructor(
@@ -77,13 +76,13 @@ function turn(direction: Direction, command: 0 | 1): Direction {
 
 function advance(x: number, y: number, direction: Direction): [number, number] {
     switch (direction) {
-        case 0:
-            return [x, y - 1];
-        case 90:
-            return [x + 1, y];
-        case 180:
-            return [x, y + 1];
-        case 270:
-            return [x - 1, y];
+    case 0:
+        return [x, y - 1];
+    case 90:
+        return [x + 1, y];
+    case 180:
+        return [x, y + 1];
+    case 270:
+        return [x - 1, y];
     }
 }

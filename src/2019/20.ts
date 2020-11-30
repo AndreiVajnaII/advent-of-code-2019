@@ -1,4 +1,4 @@
-import { isUpperCase } from "../../utils";
+import { isUpperCase } from "../utils";
 
 export function solve(lines: string[]) {
     const maze = new Maze(lines);
@@ -123,7 +123,7 @@ class Maze {
     private findPaths(
         [row, col]: [number, number],
         path: Array<[number, number]>,
-        result: Map<Gate, number> = new Map()) {
+        result: Map<Gate, number> = new Map<Gate, number>()) {
         if (isUpperCase(this.map[row][col])) {
             const gate = this.getGate(row, col)!;
             result.set(gate,

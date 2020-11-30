@@ -7,7 +7,7 @@ class Vector {
         public z: number,
     ) { }
 
-    get energy() {
+    public get energy() {
         return axes.map(axis => Math.abs(this[axis])).reduce((r, x) => r + x);
     }
 
@@ -18,15 +18,15 @@ class Moon {
         public position: Vector,
         public velocity = new Vector(0, 0, 0)) { }
 
-    get potentialEnergy() {
+    public get potentialEnergy() {
         return this.position.energy;
     }
 
-    get kineticEnergy() {
+    public get kineticEnergy() {
         return this.velocity.energy;
     }
 
-    get totalEnergy() {
+    public get totalEnergy() {
         return this.potentialEnergy * this.kineticEnergy;
     }
 }
@@ -50,7 +50,7 @@ class Pattern {
 
     constructor(private getValue: (moons: Moon[]) => number) { }
 
-    get length() {
+    public get length() {
         return this.history.length / 2;
     }
 

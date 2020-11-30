@@ -28,7 +28,7 @@ class LineOfSight {
             && Math.sign(a.y - this.startY) === Math.sign(this.dy);
     }
 
-    get quadrant() {
+    public get quadrant() {
         if (this.dy < 0 && this.dx >= 0) {
             return 1;
         } else if (this.dx > 0 && this.dy >= 0) {
@@ -40,7 +40,7 @@ class LineOfSight {
         }
     }
 
-    get slope() {
+    public get slope() {
         return this.dy / this.dx;
     }
 
@@ -84,7 +84,7 @@ class MonitoringStationFinder {
             .map(([_, i]) => new Asteroid(i % this.w, Math.floor(i / this.w)));
     }
 
-    get hasAsteroids() {
+    public get hasAsteroids() {
         return this.asteroids.length > 0;
     }
 

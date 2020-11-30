@@ -91,13 +91,13 @@ const forward = {
     "<": [-1, 0],
     ">": [+1, 0],
     "^": [0, -1],
-    "v": [0, +1]
+    "v": [0, +1],
 };
 
 let position: Turn = "^";
 
 function turn(movements: string[], map: string[]) {
-    const next = turns[position].find(([dx, dy, t, p]) => isScaffolding(map, robotX + dx, robotY + dy));
+    const next = turns[position].find(([dx, dy, _, _p]) => isScaffolding(map, robotX + dx, robotY + dy));
     if (next) {
         movements.push(next[2]);
         position = next[3];

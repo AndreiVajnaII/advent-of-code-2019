@@ -1,4 +1,4 @@
-import { isLowerCase, isUpperCase } from "../../utils";
+import { isLowerCase, isUpperCase } from "../utils";
 
 export function solve(lines: string[]) {
     const maze = new Maze(lines);
@@ -111,9 +111,9 @@ class Maze {
 
     private findPaths(name: string) {
         const [startRow, startCol] = this.locationOf(name);
-        const visitData: VisitData[][] = new Array(this.height);
+        const visitData: VisitData[][] = new Array<VisitData[]>(this.height);
         for (let row = 0; row < this.height; row++) {
-            visitData[row] = new Array(this.width);
+            visitData[row] = new Array<VisitData>(this.width);
         }
         let toVisit = [[startRow, startCol, new VisitData(0, [], [])] as const];
         while (toVisit.length > 0) {
@@ -182,7 +182,7 @@ function addKeys(...keys: string[]): SortedString {
     return newKeys.filter(isLowerCase).sort().join("") as SortedString;
 }
 
-type SortedString = string & { ___SORTED: boolean };
+type SortedString = string & { __SORTED__: boolean };
 
 class DefaultMap<K1, K2, V> extends Map<K1, Map<K2, V>> {
 

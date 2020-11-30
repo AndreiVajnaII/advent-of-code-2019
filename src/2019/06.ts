@@ -10,6 +10,7 @@ function createOrbitGraph(lines: string[]) {
 }
 
 function countOrbits(g: Graph, node: string, d: number): number {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return d + (g.get(node) || []).map(orbit => countOrbits(g, orbit, d + 1))
         .reduce((r, x) => r + x, 0);
 }

@@ -117,11 +117,11 @@ class RecursiveLayout {
         return adj;
     }
 
-    get emptyRow(): Row {
+    public get emptyRow(): Row {
         return [".", ".", ".", ".", "."];
     }
 
-    get midRow(): Midrow {
+    public get midRow(): Midrow {
         return [".", ".", undefined, ".", "."];
     }
 }

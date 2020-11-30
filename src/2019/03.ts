@@ -35,18 +35,18 @@ function calcWireLines(wire: string[]) {
         const oldPos = pos;
         steps += delta;
         switch (v[0]) {
-            case "R":
-                pos = new PointWithSteps(pos.x + delta, pos.y, steps);
-                break;
-            case "L":
-                pos = new PointWithSteps(pos.x - delta, pos.y, steps);
-                break;
-            case "U":
-                pos = new PointWithSteps(pos.x, pos.y + delta, steps);
-                break;
-            case "D":
-                pos = new PointWithSteps(pos.x, pos.y - delta, steps);
-                break;
+        case "R":
+            pos = new PointWithSteps(pos.x + delta, pos.y, steps);
+            break;
+        case "L":
+            pos = new PointWithSteps(pos.x - delta, pos.y, steps);
+            break;
+        case "U":
+            pos = new PointWithSteps(pos.x, pos.y + delta, steps);
+            break;
+        case "D":
+            pos = new PointWithSteps(pos.x, pos.y - delta, steps);
+            break;
         }
         return new Line(oldPos, pos, v[0]);
     });
@@ -89,9 +89,10 @@ function manhattanDistance(p: Point) {
     return Math.abs(p.x) + Math.abs(p.y);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function closestIntersection(wire1: string[], wire2: string[]) {
     return calcIntersectionPoints(calcWireLines(wire1), calcWireLines(wire2))
-        .map(([p, line1, line2]) => p)
+        .map(([p, _line1, _line2]) => p)
         .map(p => [p, manhattanDistance(p)])
         .reduce(([minp, mind], [p, d]) => d < mind ? [p, d] : [minp, mind]);
 }

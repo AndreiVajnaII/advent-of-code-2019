@@ -13,7 +13,7 @@ class Amplifier {
         this.proc = new IntcodeProcessor(program, this.io);
     }
 
-    get halted() {
+    public get halted() {
         return this.proc.halted;
     }
 
@@ -22,6 +22,7 @@ class Amplifier {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function runAmps(program: number[], phase: PhaseSetting) {
     const amps: Amplifier[] = [];
     for (let i = 0; i < 5; i++) {

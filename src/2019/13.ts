@@ -6,8 +6,8 @@ export async function solve(lines: string[]) {
     const io = new InMemoryIO();
     const arcade = new IntcodeProcessor(program, io);
     const screen: string[][] = [];
-    let ballX: number = 0;
-    let paddleX: number = 0;
+    let ballX = 0;
+    let paddleX = 0;
     let score = 0;
     while (!arcade.halted) {
         console.log("\x1B[2J");
@@ -18,7 +18,7 @@ export async function solve(lines: string[]) {
             const tile = io.shift();
             if (x === -1 && y === 0) {
                 score = tile;
-                console.log("Score: " + score);
+                console.log(`Score: ${score}`);
             } else {
                 if (!screen[y]) {
                     screen[y] = [];
