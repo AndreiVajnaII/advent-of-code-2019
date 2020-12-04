@@ -185,7 +185,7 @@ module.exports = {
             {
                 "rules": {
                     "import-spacing": true,
-                    "object-literal-sort-keys": true,
+                    "object-literal-sort-keys": false,
                     "whitespace": true
                 }
             }
