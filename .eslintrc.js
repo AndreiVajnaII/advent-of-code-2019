@@ -123,6 +123,10 @@ module.exports = {
                 trailingUnderscore: 'allowSingleOrDouble',
             },
             {
+                selector: 'objectLiteralProperty',
+                format: ['camelCase', 'UPPER_CASE'],
+            },
+            {
                 selector: 'typeLike',
                 format: ['PascalCase']
             }
