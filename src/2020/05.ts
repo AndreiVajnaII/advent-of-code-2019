@@ -1,6 +1,6 @@
 export function solve(lines: string[]) {
     const seats =  lines.map(line => line.split("") as BoardingPassString)
-        .map(boardingPass => decodeBSP(boardingPass));
+        .map(boardingPass => decodeSeat(boardingPass));
     return [seats.reduce((max, v) => v > max ? v : max),
         findMySeat(seats)];
 }
@@ -14,9 +14,8 @@ function findMySeat(seats: number[]) {
     }
 }
 
-function decodeBSP(s: BoardingPassString, result = 0): number {
-    return s.length === 0 ? result
-        : decodeBSP(s.slice(1), result * 2 + charValues[s[0]]);
+function decodeSeat(s: BoardingPassString): number {
+    return s.reduce((result, c) => 2 * result + charValues[c], 0);
 }
 
 const charValues = {
