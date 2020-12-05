@@ -4,16 +4,22 @@ export function solve(lines: string[]) {
     return groupPassportLines(lines).map(parsePassportLine).filter(isValid).length;
 }
 
-// TODO: improve
 function groupPassportLines(lines: string[]) {
-    return lines.reduce((passportLines: string[], line: string) => {
+    const result: string[] = [];
+    let newPass = true;
+    for (const line of lines) {
         if (line === "") {
-            return [...passportLines, ""];
+            newPass = true;
         } else {
-            passportLines[passportLines.length - 1] += " " + line;
-            return passportLines;
+            if (newPass) {
+                result.push(line);
+                newPass = false;
+            } else {
+                result[result.length - 1] += " " + line;
+            }
         }
-    }, [""]);
+    }
+    return result;
 }
 
 function parsePassportLine(passportLine: string): PotentialPassport {
