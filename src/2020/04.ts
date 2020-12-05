@@ -1,3 +1,5 @@
+import { objFromEntries } from "../utils";
+
 export function solve(lines: string[]) {
     return groupPassportLines(lines).map(parsePassportLine).filter(isValid).length;
 }
@@ -14,21 +16,17 @@ function groupPassportLines(lines: string[]) {
     }, [""]);
 }
 
+function parsePassportLine(passportLine: string): PotentialPassport {
+    return objFromEntries(passportLine.split(" ")
+        .map(field => field.split(":") as [RequiredPassportField, string]));
+}
+
 function isValid(passport: PotentialPassport) {
     return validators.every(([field, validator]) => isValidField(passport[field], validator));
 }
 
-function isValidField(fieldValue: string | undefined, validator: (s: string) => boolean) {
+function isValidField(fieldValue: string | undefined, validator: Validator) {
     return fieldValue && validator(fieldValue);
-}
-
-// TODO: Object.fromEntries
-function parsePassportLine(passportLine: string) {
-    return passportLine.split(" ").map(field => field.split(":") as [RequiredPassportField, string])
-        .reduce((result: PotentialPassport, [field, value]) => {
-            result[field] = value;
-            return result;
-        }, {});
 }
 
 const validators = [
@@ -41,8 +39,10 @@ const validators = [
     ["pid", regexValidator(/^\d{9}$/)] as const,
 ];
 
-type RequiredPassportField = typeof validators extends Array<readonly [infer R, (s: string) => boolean]> ? R: never;
+type Validator = (s: string) => boolean;
+type RequiredPassportField = typeof validators extends Array<readonly [infer R, Validator]> ? R: never;
 type PotentialPassport = Partial<Record<RequiredPassportField, string>>;
+
 
 function numberValidator(min: number, max: number) {
     return (s: string) => min <= (+s) && (+s) <= max;
