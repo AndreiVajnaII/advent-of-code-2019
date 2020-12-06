@@ -1,26 +1,14 @@
-import { objFromEntries } from "../utils";
+import { groupLines, objFromEntries } from "../utils";
 
 export function solve(lines: string[]) {
-    return groupPassportLines(lines).map(parsePassportLine).filter(isValid).length;
+    return groupLines(lines)
+        .map(joinPassportLines)
+        .map(parsePassportLine)
+        .filter(isValid)
+        .length;
 }
 
-function groupPassportLines(lines: string[]) {
-    const result: string[] = [];
-    let newPass = true;
-    for (const line of lines) {
-        if (line === "") {
-            newPass = true;
-        } else {
-            if (newPass) {
-                result.push(line);
-                newPass = false;
-            } else {
-                result[result.length - 1] += " " + line;
-            }
-        }
-    }
-    return result;
-}
+const joinPassportLines = (group: string[]) => group.join(" ");
 
 function parsePassportLine(passportLine: string): PotentialPassport {
     return objFromEntries(passportLine.split(" ")
