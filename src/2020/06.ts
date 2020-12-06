@@ -1,11 +1,12 @@
-import { CollectFunction, groupLines, intersect, sum, union } from "../utils";
+import { boxed, CollectFunction, groupLines, intersect, sum, union } from "../utils";
 
 export function solve(lines: string[]) {
-    return [union, intersect].map(collect => groupLines(lines)
-        .map(splitAnswers)
-        .map(collectAnswers(collect))
-        .map(answers => answers.size)
-        .reduce(sum));
+    return boxed(groupLines(lines).map(splitAnswers))
+        .reduce(groupedAnswers =>
+            [union, intersect].map(collect =>
+                groupedAnswers.map(collectAnswers(collect))
+                    .map(answers => answers.size)
+                    .reduce(sum)));
 }
 
 function splitAnswers(group: string[]) {

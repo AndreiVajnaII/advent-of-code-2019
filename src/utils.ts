@@ -1,6 +1,9 @@
 export type ValuesOf<T extends readonly any[]> = T extends ReadonlyArray<infer R> ? R : never;
 
 export const sum = (a: number, b: number) => a + b;
+export const product = (a: number, b: number) => a * b;
+export const max = (a: number, b: number) => a > b ? a : b;
+export const min = (a: number, b: number) => a < b ? a : b;
 
 export function isUpperCase(s: string) {
     return s.charCodeAt(0) >= "A".charCodeAt(0) && s.charCodeAt(0) <= "Z".charCodeAt(0);
@@ -17,6 +20,16 @@ export function objFromEntries<K extends keyof any, V>(entries: Iterable<readonl
     }
     return result;
 }
+
+export class Box<T> {
+    constructor(public value: T) { }
+
+    public reduce<R>(f: (value: T) => R) {
+        return f(this.value);
+    }
+}
+
+export const boxed = <T>(value: T) => new Box(value);
 
 export type CollectFunction<T> = (a: Set<T>, b: Set<T>) => Set<T>;
 

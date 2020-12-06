@@ -1,8 +1,6 @@
 export function solve(lines: string[]) {
-    return [
-        lines.filter(isValid1).length,
-        lines.filter(isValid2).length,
-    ];
+    return [isValid1, isValid2]
+        .map(isValid => lines.filter(isValid).length);
 }
 
 function isValid1(line: string) {

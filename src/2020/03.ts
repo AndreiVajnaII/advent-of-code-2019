@@ -1,7 +1,9 @@
+import { product } from "../utils";
+
 export function solve(map: string[]) {
     return [[1, 1], [1, 3], [1, 5], [1, 7], [2, 1]]
         .map(([slopeY, slopeX]) => countTrees(map, slopeY, slopeX))
-        .reduce((r, x) => r * x);
+        .reduce(product);
 }
 
 function countTrees(map: string[], slopeY: number, slopeX: number) {

@@ -1,9 +1,11 @@
+import { boxed, max } from "../utils";
+
 export function solve(lines: string[]) {
-    const seats =  lines.map(line => line.split("") as BoardingPassString)
-        .map(boardingPass => decodeSeat(boardingPass));
-    return [seats.reduce((max, v) => v > max ? v : max),
-        findMySeat(seats)];
+    return boxed(lines.map(parseBoardingPass).map(decodeSeat))
+        .reduce(seats => [seats.reduce(max), findMySeat(seats)]);
 }
+
+const parseBoardingPass = (line: string) => line.split("") as BoardingPassString;
 
 function findMySeat(seats: number[]) {
     const sortedSeats = seats.sort();
