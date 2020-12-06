@@ -1,18 +1,11 @@
 import { CollectFunction, groupLines, intersect, sum, union } from "../utils";
 
 export function solve(lines: string[]) {
-    return [
-        countAnswers(lines, union),
-        countAnswers(lines, intersect),
-    ];
-}
-
-function countAnswers(lines: string[], collect: CollectFunction<string>) {
-    return groupLines(lines)
+    return [union, intersect].map(collect => groupLines(lines)
         .map(splitAnswers)
         .map(collectAnswers(collect))
         .map(answers => answers.size)
-        .reduce(sum);
+        .reduce(sum));
 }
 
 function splitAnswers(group: string[]) {
