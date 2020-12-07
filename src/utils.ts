@@ -24,6 +24,10 @@ export function objFromEntries<K extends keyof any, V>(entries: Iterable<readonl
 export class Box<T> {
     constructor(public value: T) { }
 
+    public map<R>(f: (value: T) => R) {
+        return new Box(f(this.value));
+    }
+
     public reduce<R>(f: (value: T) => R) {
         return f(this.value);
     }
