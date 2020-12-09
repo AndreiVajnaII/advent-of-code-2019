@@ -1,5 +1,7 @@
 export type ValuesOf<T extends readonly any[]> = T extends ReadonlyArray<infer R> ? R : never;
 
+export const toNum = (s: string) => +s;
+
 export const sum = (a: number, b: number) => a + b;
 export const product = (a: number, b: number) => a * b;
 export const max = (a: number, b: number) => a > b ? a : b;
