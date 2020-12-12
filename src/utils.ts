@@ -10,6 +10,8 @@ export const ascending = (a: number, b: number) => a - b;
 
 export const concat = <T>(a: T[], b: T[]) => a.concat(b);
 
+export const manhattan = ({ x, y }: { x: number; y: number }) => Math.abs(x) + Math.abs(y);
+
 export function isUpperCase(s: string) {
     return s.charCodeAt(0) >= "A".charCodeAt(0) && s.charCodeAt(0) <= "Z".charCodeAt(0);
 }

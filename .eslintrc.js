@@ -117,14 +117,10 @@ module.exports = {
                 trailingUnderscore: 'allow',
             },
             {
-                selector: ['variable', 'parameter', 'typeProperty'],
+                selector: ['variable', 'parameter', 'property', 'method'],
                 format: ['camelCase', 'UPPER_CASE'],
                 leadingUnderscore: 'allowSingleOrDouble',
                 trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-                selector: 'objectLiteralProperty',
-                format: ['camelCase', 'UPPER_CASE'],
             },
             {
                 selector: 'typeLike',
