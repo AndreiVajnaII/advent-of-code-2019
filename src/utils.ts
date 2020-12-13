@@ -8,7 +8,30 @@ export const max = (a: number, b: number) => a > b ? a : b;
 export const min = (a: number, b: number) => a < b ? a : b;
 export const ascending = (a: number, b: number) => a - b;
 
+export const withOriginal = <T, R>(f: (x: T, index: number) => R) =>
+    (x: T, index: number) => [x, f(x, index)] as const;
+export const mapped = <T>([_o, m]: readonly [any, T]) => m;
+export const original = <T>([o, _m]: readonly [T, any]) => o;
+export const byOriginal = <T, R>(f: (x: T) => R) =>
+    ([o, _m]: readonly [T, any]) => f(o);
+export const ofOriginal = <T, M, R>(f: (x: T) => R) =>
+    ([o, m]: readonly [T, M]) => [f(o), m] as const;
+
+export const minOf = <T>(f: (x: T) => number) => (a: T, b: T) => f(a) < f(b) ? a : b;
+export const maxOf = <T>(f: (x: T) => number) => (a: T, b: T) => f(a) > f(b) ? a : b;
+
 export const concat = <T>(a: T[], b: T[]) => a.concat(b);
+
+export function lcm(a: number, b: number) {
+    return a * b / gcd(a, b);
+}
+
+export function gcd(a: number, b: number): number {
+    while (b !== 0) {
+        [a, b] = [b, a % b];
+    }
+    return a;
+}
 
 export const manhattan = ({ x, y }: { x: number; y: number }) => Math.abs(x) + Math.abs(y);
 
