@@ -1,6 +1,6 @@
-import { solve } from "./2020/13";
+import { solve } from "./2020/14";
 import { readInput } from "./helpers";
 
-const inputUrl = "https://adventofcode.com/2020/day/13/input";
+const inputUrl = "https://adventofcode.com/2020/day/14/input";
 
 readInput(inputUrl, process.argv[2], solve);

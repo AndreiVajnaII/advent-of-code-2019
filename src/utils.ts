@@ -22,6 +22,9 @@ export const maxOf = <T>(f: (x: T) => number) => (a: T, b: T) => f(a) > f(b) ? a
 
 export const concat = <T>(a: T[], b: T[]) => a.concat(b);
 
+export const replace = <T>(array: T[], index: number, value: T) =>
+    [...array.slice(0, index), value, ...array.slice(index + 1)];
+
 export function lcm(a: number, b: number) {
     return a * b / gcd(a, b);
 }
