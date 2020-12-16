@@ -22,6 +22,14 @@ export const maxOf = <T>(f: (x: T) => number) => (a: T, b: T) => f(a) > f(b) ? a
 
 export const concat = <T>(a: T[], b: T[]) => a.concat(b);
 
+export function createRange(start: number, end: number) {
+    const range: number[] = [];
+    for (let i = 0; i < end - start; i++) {
+        range[i] = start + i;
+    }
+    return range;
+}
+
 export const replace = <T>(array: T[], index: number, value: T) =>
     [...array.slice(0, index), value, ...array.slice(index + 1)];
 
@@ -89,6 +97,10 @@ export function intersect<T>(a: Set<T>, b: Set<T>) {
         }
     });
     return result;
+}
+
+export function single<T>(set: Set<T>) {
+    return set.values().next().value as T;
 }
 
 // groups lines separated by blank lines
