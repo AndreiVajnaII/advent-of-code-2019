@@ -121,3 +121,110 @@ export function groupLines(lines: string[]) {
     }
     return result;
 }
+export class RecursiveArray<T> {
+    public dimensions: number;
+
+    public array: Array<RecursiveArray<T> | OneDimensionalArray<T>>;
+
+    constructor([length1, length2, ...rest]: number[]) {
+        this.array = new Array<RecursiveArray<T> | OneDimensionalArray<T>>(length1);
+        for (let i = 0; i < this.array.length; i++) {
+            this.array[i] = rest.length === 0
+                ? new OneDimensionalArray<T>(length2)
+                : new RecursiveArray<T>([length2, ...rest]);
+        }
+        this.dimensions = this.array[0].dimensions + 1;
+    }
+
+    public get lengths(): number[] {
+        return [this.array.length].concat(this.array[0].lengths);
+    }
+
+    public getValue([index, ...rest]: number[]): T {
+        return this.array[index].getValue(rest);
+    }
+
+    public setValue([index, ...rest]: number[], value: T) {
+        this.array[index].setValue(rest, value);
+    }
+
+    public push(value: RecursiveArray<T> | OneDimensionalArray<T>) {
+        this.array.push(value);
+    }
+
+    public unshift(value: RecursiveArray<T> | OneDimensionalArray<T>) {
+        this.array.unshift(value);
+    }
+
+    public fill(value: T) {
+        this.array.forEach(subArray => subArray.fill(value));
+        return this;
+    }
+
+    public isInBounds([index, ...rest]: number[]): boolean {
+        return 0 <= index && index < this.array.length && this.array[0].isInBounds(rest);
+    }
+
+    public forEach(f: (element: T, indices: number[]) => void, currentIndices: number[] = []) {
+        this.array.forEach((subArray, index) => subArray.forEach(f, currentIndices.concat(index)));
+    }
+
+}
+
+export class OneDimensionalArray<T> {
+    public dimensions = 1;
+
+    private array: T[];
+
+    constructor(length: number) {
+        this.array = new Array<T>(length);
+    }
+
+    public get lengths(): number[] {
+        return [this.array.length];
+    }
+
+    public getValue([index]: number[]) {
+        return this.array[index];
+    }
+
+    public setValue([index]: number[], value: T) {
+        this.array[index] = value;
+    }
+
+    public push(value: T) {
+        this.array.push(value);
+    }
+
+    public unshift(value: T) {
+        this.array.unshift(value);
+    }
+
+    public fill(value: T) {
+        this.array.fill(value);
+        return this;
+    }
+
+    public isInBounds([index]: number[]) {
+        return 0 <= index && index < this.array.length;
+    }
+
+    public forEach(f: (element: T, indices: number[]) => void, currentIndices: number[] = []) {
+        this.array.forEach((el, index) => f(el, currentIndices.concat(index)));
+    }
+}
+
+const neighbours1 = [[0], [1], [-1]];
+
+export function neighbours(dimensions: number, top = true): number[][] {
+    if (dimensions === 1) {
+        return neighbours1;
+    } else {
+        const result = neighbours(dimensions - 1, false).flatMap(r => neighbours1.map(n => n.concat(r)));
+        if (top) {
+            return result.slice(1);
+        } else {
+            return result;
+        }
+    }
+}
