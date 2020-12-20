@@ -33,6 +33,19 @@ export function createRange(start: number, end: number) {
 export const replace = <T>(array: T[], index: number, value: T) =>
     [...array.slice(0, index), value, ...array.slice(index + 1)];
 
+export function rotateArray<T>(arr: T[][]) {
+    const result = new Array<T[]>(arr.length);
+    for (let row = 0; row < arr.length; row++) {
+        result[row] = new Array<T>(arr[row].length);
+    }
+    for (let row = 0; row < arr.length; row++) {
+        for (let col = 0; col < arr[row].length; col++) {
+            result[row][col] = arr[arr[row].length - col - 1][row];
+        }
+    }
+    return result;
+}
+
 export function lcm(a: number, b: number) {
     return a * b / gcd(a, b);
 }
@@ -52,6 +65,10 @@ export function isUpperCase(s: string) {
 
 export function isLowerCase(s: string) {
     return s.charCodeAt(0) >= "a".charCodeAt(0) && s.charCodeAt(0) <= "z".charCodeAt(0);
+}
+
+export function reverseString(s: string) {
+    return s.split("").reverse().join("");
 }
 
 export function objFromEntries<K extends keyof any, V>(entries: Iterable<readonly [K, V]>) {
