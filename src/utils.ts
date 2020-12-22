@@ -33,6 +33,9 @@ export function createRange(start: number, end: number) {
 export const replace = <T>(array: T[], index: number, value: T) =>
     [...array.slice(0, index), value, ...array.slice(index + 1)];
 
+export const arraysEqual = <T>(a: T[], b: T[]) =>
+    a.length === b.length && a.every((v, i) => v === b[i]);
+
 export function rotateArray<T>(arr: T[][]) {
     const result = new Array<T[]>(arr.length);
     for (let row = 0; row < arr.length; row++) {
