@@ -248,3 +248,76 @@ export function neighbours(dimensions: number, top = true): number[][] {
         }
     }
 }
+
+export class TupleSet<T extends readonly number[] | readonly string[]> implements Set<T> {
+    private readonly set = new Set<string>();
+
+    constructor(private readonly isNumber = true) { }
+
+    public add(value: T): this {
+        this.set.add(this.tupleToKey(value));
+        return this;
+    }
+
+    public has(value: T): boolean {
+        return this.set.has(this.tupleToKey(value));
+    }
+
+    public delete(value: T): boolean {
+        return this.set.delete(this.tupleToKey(value));
+    }
+
+    public forEach(callbackfn: (value: T, value2: T, set: Set<T>) => void, thisArg?: any): void {
+        this.set.forEach(key => callbackfn(this.keyToTuple(key), this.keyToTuple(key), this), thisArg);
+    }
+
+    public clear(): void {
+        this.set.clear();
+    }
+
+    public get size(): number {
+        return this.set.size;
+    }
+
+    public * keys(): IterableIterator<T> {
+        for (const key of this.set) {
+            yield this.keyToTuple(key);
+        }
+    }
+
+    public values(): IterableIterator<T> {
+        return this.keys();
+    }
+
+    public * entries(): IterableIterator<[T, T]> {
+        for (const tuple of this.keys()) {
+            yield [tuple, tuple];
+        }
+    }
+
+    public [Symbol.iterator](): IterableIterator<T> {
+        return this.keys();
+    }
+
+    public get [Symbol.toStringTag](): string {
+        const values: T[] = [];
+        const it = this.values();
+        for (let v = it.next(), n = 0; n < 5 && !v.done; v = it.next(), n++) {
+            values.push(v.value);
+        }
+        let valuesEnumeration = values.join("; ");
+        if (values.length < this.size) {
+            valuesEnumeration += "; ...";
+        }
+        return `TupleSet(${this.size}) {${valuesEnumeration}}`;
+    }
+
+    private tupleToKey(tuple: T) {
+        return tuple.join(",");
+    }
+
+    private keyToTuple(key: string): T {
+        const tuple = key.split(",") as readonly string[];
+        return (this.isNumber ? tuple.map(toNum) as readonly number[] : tuple) as T;
+    }
+}
