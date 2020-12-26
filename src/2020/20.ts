@@ -1,6 +1,6 @@
 import { concat, groupLines, reverseString, rotateArray } from "../utils";
 
-export function solve(lines: string[]) {
+export function solve(lines: string[], fun = false) {
     const tiles = groupLines(lines).map(parseTile);
     const borders = new Map<string, Tile[]>();
     for (const tile of tiles) {
@@ -42,7 +42,9 @@ export function solve(lines: string[]) {
             .reduce((a, b) => a.map((tileRow, i) => tileRow.concat(b[i]))))
         .reduce(concat));
     image.flipUntil(containsSeaMonster);
-    image.print();
+    if (fun) {
+        image.print();
+    }
 
     return [
         tileGrid[0][0].id

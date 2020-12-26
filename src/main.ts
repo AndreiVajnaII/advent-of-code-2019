@@ -1,6 +1,12 @@
-import { solve } from "./2020/25";
-import { readInput } from "./helpers";
+import { measure, padDay, run } from "./helpers";
 
-const inputUrl = "https://adventofcode.com/2020/day/25/input";
+const year = "2020";
+const day = "25";
 
-readInput(inputUrl, process.argv[2], solve);
+void import(`./${year}/${padDay(day)}`).then(
+    (m: AocSolutionModule) => run(year, day, process.argv[2], measure(m.solve)),
+    console.error);
+interface AocSolutionModule {
+    solve: (lines: string[], fun?: boolean) => unknown;
+}
+
