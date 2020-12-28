@@ -34,6 +34,7 @@ function isValid(rules: Map<string, Rule>) {
                 return true;
             }
         }
+        return false;
     };
 }
 
@@ -44,10 +45,8 @@ interface Rule {
 class SequenceRule implements Rule {
     constructor(private readonly ruleIds: string[]) { }
 
-    public * exec(s: string, index: number, rules: Map<string, Rule>) {
-        for (const i of this.execRule(this.ruleIds, s, index, rules)) {
-            yield i;
-        }
+    public exec(s: string, index: number, rules: Map<string, Rule>) {
+        return this.execRule(this.ruleIds, s, index, rules);
     }
 
     private * execRule(ruleIds: string[], s: string, index: number, rules: Map<string, Rule>): Generator<number> {
